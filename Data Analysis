@@ -102,7 +102,7 @@
       "metadata": {
         "id": "189VaXJuS-RC"
       },
-      "execution_count": 12,
+      "execution_count": 26,
       "outputs": []
     },
     {
@@ -263,11 +263,11 @@
         "  .show(10)"
       ],
       "metadata": {
-        "id": "ssGuFeAvWhiB",
-        "outputId": "23c7113c-6deb-4dd1-9a32-c22096c2e7f6",
         "colab": {
           "base_uri": "https://localhost:8080/"
-        }
+        },
+        "id": "ssGuFeAvWhiB",
+        "outputId": "23c7113c-6deb-4dd1-9a32-c22096c2e7f6"
       },
       "execution_count": 24,
       "outputs": [
