@@ -4,7 +4,7 @@
   "metadata": {
     "colab": {
       "provenance": [],
-      "authorship_tag": "ABX9TyNcrJ82nqsRV7v3OnG39E5F",
+      "authorship_tag": "ABX9TyPZn1Y6puntuha3JNOKU0/c",
       "include_colab_link": true
     },
     "kernelspec": {
@@ -249,6 +249,46 @@
             "|      Ipatinga|            4.0|\n",
             "|Upplands V�sby|            4.0|\n",
             "+--------------+---------------+\n",
+            "only showing top 10 rows\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.groupBy(\"Product Name\") \\\n",
+        "  .sum(\"Sales\") \\\n",
+        "  .orderBy(\"sum(Sales)\", ascending=False) \\\n",
+        "  .show(10)"
+      ],
+      "metadata": {
+        "id": "ssGuFeAvWhiB",
+        "outputId": "23c7113c-6deb-4dd1-9a32-c22096c2e7f6",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "execution_count": 24,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+--------------------+------------------+\n",
+            "|        Product Name|        sum(Sales)|\n",
+            "+--------------------+------------------+\n",
+            "|Field & Stream Sp...| 6929653.690575093|\n",
+            "|Perfect Fitness P...| 4421143.143537685|\n",
+            "|Diamondback Women...| 4118425.571018858|\n",
+            "|Nike Men's Free 5...|3667633.1966301384|\n",
+            "|Nike Men's Dri-FI...|         3147800.0|\n",
+            "|Pelican Sunstream...|3099845.0852499213|\n",
+            "|Nike Men's CJ Eli...| 2891757.662352653|\n",
+            "|O'Brien Men's Neo...|2888993.9135052995|\n",
+            "|Under Armour Girl...| 1269082.671108156|\n",
+            "|         Dell Laptop|          663000.0|\n",
+            "+--------------------+------------------+\n",
             "only showing top 10 rows\n"
           ]
         }
