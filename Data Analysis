@@ -1,0 +1,258 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyNcrJ82nqsRV7v3OnG39E5F",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/MOHMEDSHAMILVP-jpg/Supply-Chain---Big-Data-Logistics-Demand-Forecasting/blob/main/Data%20Analysis\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = spark.read.csv(\n",
+        "    \"DataCoSupplyChainDataset(AutoRecovered).csv\",\n",
+        "    header=True,\n",
+        "    inferSchema=True\n",
+        ")\n",
+        "\n",
+        "df.show(5)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "mcYkBjrOPLbD",
+        "outputId": "1d64f48e-2655-4ed0-f0d2-b8575df27c7f"
+      },
+      "execution_count": 8,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+------------------------+-----------------------------+------------------+----------------+------------------+-------------+-----------+-----------+------------+----------+-------------+-----------------------+--------+------+----------------+--------------+---------------+------------+--------------------------+--------------+\n",
+            "|Days for shipping (real)|Days for shipment (scheduled)|Sales per customer| Delivery Status|Late_delivery_risk|Customer City|Customer Id|   Latitude|   Longitude|Order City|Order Country|order date (DateOrders)|Order Id| Sales|Order Item Total|  Order Region|   Order Status|Product Name|shipping date (DateOrders)| Shipping Mode|\n",
+            "+------------------------+-----------------------------+------------------+----------------+------------------+-------------+-----------+-----------+------------+----------+-------------+-----------------------+--------+------+----------------+--------------+---------------+------------+--------------------------+--------------+\n",
+            "|                       3|                            4|       314.6400146|Advance shipping|                 0|       Caguas|      20755| 18.2514534|-66.03705597|    Bekasi|    Indonesia|        1/31/2018 22:56|   77202|327.75|     314.6400146|Southeast Asia|       COMPLETE|Smart watch |            2/3/2018 22:56|Standard Class|\n",
+            "|                       5|                            4|       311.3599854|   Late delivery|                 1|       Caguas|      19492|18.27945137| -66.0370636|   Bikaner|        India|        1/13/2018 12:27|   75939|327.75|     311.3599854|    South Asia|        PENDING|Smart watch |           1/18/2018 12:27|Standard Class|\n",
+            "|                       4|                            4|       309.7200012|Shipping on time|                 0|     San Jose|      19491|37.29223251| -121.881279|   Bikaner|        India|        1/13/2018 12:06|   75938|327.75|     309.7200012|    South Asia|         CLOSED|Smart watch |           1/17/2018 12:06|Standard Class|\n",
+            "|                       3|                            4|       304.8099976|Advance shipping|                 0|  Los Angeles|      19490|34.12594605|-118.2910156|Townsville|    Australia|        1/13/2018 11:45|   75937|327.75|     304.8099976|       Oceania|       COMPLETE|Smart watch |           1/16/2018 11:45|Standard Class|\n",
+            "|                       2|                            4|            298.25|Advance shipping|                 0|       Caguas|      19489|18.25376892|-66.03704834|Townsville|    Australia|        1/13/2018 11:24|   75936|327.75|          298.25|       Oceania|PENDING_PAYMENT|Smart watch |           1/15/2018 11:24|Standard Class|\n",
+            "+------------------------+-----------------------------+------------------+----------------+------------------+-------------+-----------+-----------+------------+----------+-------------+-----------------------+--------+------+----------------+--------------+---------------+------------+--------------------------+--------------+\n",
+            "only showing top 5 rows\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = df.withColumnRenamed(\"Days for shipping (real)\", \"actual_days\") \\\n",
+        "       .withColumnRenamed(\"Days for shipment (scheduled)\", \"scheduled_days\") \\\n",
+        "       .withColumnRenamed(\"Order date (DateOrders)\", \"order_date\") \\\n",
+        "       .withColumnRenamed(\"shipping date (DateOrders)\", \"shipping_date\") \\\n",
+        "       .withColumnRenamed(\"Order Id\", \"order_id\") \\\n",
+        "       .withColumnRenamed(\"Customer Id\", \"customer_id\")"
+      ],
+      "metadata": {
+        "id": "5sULwiHoSxfy"
+      },
+      "execution_count": 10,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = df.dropna()"
+      ],
+      "metadata": {
+        "id": "Le5q-8AxS7pK"
+      },
+      "execution_count": 11,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from pyspark.sql.functions import to_date\n",
+        "\n",
+        "df = df.withColumn(\"order_date\", to_date(\"order_date\")) \\\n",
+        "       .withColumn(\"shipping_date\", to_date(\"shipping_date\"))"
+      ],
+      "metadata": {
+        "id": "189VaXJuS-RC"
+      },
+      "execution_count": 12,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from pyspark.sql.functions import col\n",
+        "\n",
+        "df = df.withColumn(\n",
+        "    \"delay_days\",\n",
+        "    col(\"actual_days\") - col(\"scheduled_days\")\n",
+        ")"
+      ],
+      "metadata": {
+        "id": "n78VPdkDVCOy"
+      },
+      "execution_count": 17,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = df.withColumn(\n",
+        "    \"on_time\",\n",
+        "    (col(\"delay_days\") <= 0).cast(\"int\")\n",
+        ")"
+      ],
+      "metadata": {
+        "id": "2BJ-o4uyVIp6"
+      },
+      "execution_count": 18,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from pyspark.sql.functions import month\n",
+        "\n",
+        "df = df.withColumn(\"order_month\", month(\"order_date\"))"
+      ],
+      "metadata": {
+        "id": "NGr5GFkZVLIq"
+      },
+      "execution_count": 19,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.groupBy(\"Delivery Status\") \\\n",
+        "  .count() \\\n",
+        "  .show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "H-u2TIHaWBei",
+        "outputId": "1a477b98-a066-46d8-927d-abb21e6d37fa"
+      },
+      "execution_count": 20,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+-----------------+-----+\n",
+            "|  Delivery Status|count|\n",
+            "+-----------------+-----+\n",
+            "| Shipping on time|32196|\n",
+            "| Advance shipping|41592|\n",
+            "|Shipping canceled| 7754|\n",
+            "|    Late delivery|98977|\n",
+            "+-----------------+-----+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.groupBy(\"Shipping Mode\") \\\n",
+        "  .avg(\"delay_days\") \\\n",
+        "  .show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "qC_cMGHyWEPa",
+        "outputId": "3b48c252-56f3-4bcb-b0cb-91c505df73a6"
+      },
+      "execution_count": 21,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+--------------+--------------------+\n",
+            "| Shipping Mode|     avg(delay_days)|\n",
+            "+--------------+--------------------+\n",
+            "|   First Class|                 1.0|\n",
+            "|      Same Day|  0.4782787306151792|\n",
+            "|  Second Class|  1.9908280327124035|\n",
+            "|Standard Class|-0.00409273145742...|\n",
+            "+--------------+--------------------+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.groupBy(\"Order City\") \\\n",
+        "  .avg(\"delay_days\") \\\n",
+        "  .orderBy(\"avg(delay_days)\", ascending=False) \\\n",
+        "  .show(10)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "cXopb8lGWH6a",
+        "outputId": "36b0945c-2c6f-4323-b1a7-92708770ee42"
+      },
+      "execution_count": 22,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+--------------+---------------+\n",
+            "|    Order City|avg(delay_days)|\n",
+            "+--------------+---------------+\n",
+            "|     Treviglio|            4.0|\n",
+            "| V�rzea Grande|            4.0|\n",
+            "|       C�rtama|            4.0|\n",
+            "|      Sogamoso|            4.0|\n",
+            "|      G�nzburg|            4.0|\n",
+            "|       Aracati|            4.0|\n",
+            "|      Envigado|            4.0|\n",
+            "| Aix-les-Bains|            4.0|\n",
+            "|      Ipatinga|            4.0|\n",
+            "|Upplands V�sby|            4.0|\n",
+            "+--------------+---------------+\n",
+            "only showing top 10 rows\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
