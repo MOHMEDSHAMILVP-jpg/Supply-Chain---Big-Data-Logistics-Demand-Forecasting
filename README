@@ -1,0 +1,15 @@
+Global Logistics & Demand Forecasting (LogiScale BigData)
+
+Project Overview
+
+This project focuses on analyzing global logistics operations and forecasting demand using big data techniques.
+The goal is to improve delivery performance, identify delays, and generate insights for better supply chain decision-making.
+Analyze delivery delays and on-time performance
+Evaluate shipping efficiency across regions and modes
+Identify high-risk late deliveries
+Perform sales and demand analysis
+Build an interactive dashboard for business insights
+
+Project Workflow
+
+Raw Dataset → Data Cleaning (PySpark) → Feature Engineering → Data Analysis → SQL Aggregation → Power BI Dashboard
